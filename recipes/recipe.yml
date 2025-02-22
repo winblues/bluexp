@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+name: bluexp
+description: A desktop for your childhood home's computer room
+
+base-image: ghcr.io/winblues/vauxite
+image-version: 41
+
+modules:
+
+  - type: files
+    files:
+      - source: system
+        destination: /
+  - type: script
+    scripts:
+      - 20-xfce-winxp-tc.sh
+
+  - type: bling
+    install:
+      - 1password
+
+  - type: rpm-ostree
+    install:
+      - audacious
+      - btop
+      - catfish
+      - deepin-qt5platform-plugins # for bauh
+      - edk2-ovmf
+      - libvirt
+      - libvirt-nss
+      - libcanberra-gtk3
+      - lightdm-gtk-greeter-settings
+      - mate-disk-usage-analyzer
+      - mate-system-monitor
+      - menulibre
+      - neovim
+      - orage
+      - podman-compose
+      - podman-machine
+      - python3-cairosvg
+      - plymouth-plugin-script
+      - qemu-char-spice
+      - qemu-device-display-virtio-gpu
+      - qemu-device-display-virtio-vga
+      - qemu-device-usb-redirect
+      - qemu-img
+      - qemu-system-x86-core
+      - qemu-user-binfmt
+      - qemu-user-static
+      - qemu
+      - qt5ct
+      - qt5-qtstyleplugins
+      - sox
+      - strace
+      - virt-manager
+      - vorbis-tools
+      - wine-ms-sans-serif-fonts
+      - wine-tahoma-fonts
+      - xscreensaver-extras
+      - xscreensaver-extras-gss
+
+  - type: script
+    scripts:
+      - 00-image-info.sh
+      - 01-main.sh
+      - 10-install-appimages.sh
+      #- 20-xfce-winxp-tc.sh
+      - 21-de-tweaks.sh
+
+  - type: default-flatpaks
+    notify: true # Send notification after install/uninstall is finished
+    system:
+      # Flathub will be used by default
+      install:
+        - org.mozilla.firefox
+        - org.geany.Geany
+
+  # Regenerate initramfs because of plymouth
+  - type: initramfs
+
+  - type: signing
+

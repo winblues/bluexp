@@ -1,0 +1,20 @@
+XFCE_WINXP_TC_VERSION := "4f73e4a740041635eecd30abccc2fdafabb21582"
+
+initialize-workspace:
+  #!/bin/bash
+  rm -rf workspace
+  mkdir -p workspace
+  cd workspace
+  git clone https://github.com/rozniak/xfce-winxp-tc.git
+  cd xfce-winxp-tc
+  git checkout {{ XFCE_WINXP_TC_VERSION }}
+
+
+build-dev-image:
+  #!/bin/bash
+  podman build -f Containerfile -t xfce-winxp-tc-dev-image
+
+build-all: initialize-workspace build-dev-image
+  #!/bin/bash
+  cd workspace/xfce-winxp-tc
+  podman run -it --volume $PWD:/app:Z -w /app --rm xfce-winxp-tc-dev-image bash /app/packaging/buildall.sh
