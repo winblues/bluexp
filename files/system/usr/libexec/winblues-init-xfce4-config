@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -euo pipefail
+
+set -x
+
+cd ~/.config
+for d in /etc/skel/.config/*; do
+  rsync --verbose -aP "$d" .
+done
+
+mkdir -p $HOME/.local/state/winblues
+touch $HOME/.local/state/winblues/bluexp-initialized.${WINBLUES_BLUEXP_INIT_VERSION}

@@ -1,0 +1,15 @@
+[Unit]
+Description=Run winblues init script on user login
+After=graphical.target
+ConditionUser=!@system
+
+[Service]
+Type=oneshot
+Environment=USER=%u
+Environment=WINBLUES_BLUEXP_INIT_VERSION=1
+ExecStart=/bin/bash -c 'if [ ! -f $HOME/.local/state/winblues/winxp-initialized.$WINBLUES_BLUEXP_INIT_VERSION ]; then /usr/libexec/winblues-init-xfce4-config ; fi'
+User=%u
+
+[Install]
+WantedBy=default.target
+
