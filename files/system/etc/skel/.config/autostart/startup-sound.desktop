@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Windows XP startup sound
+Exec=aplay "/usr/share/sounds/Windows XP Default/stereo/res/startup.wav"
+NoDisplay=true
+Terminal=false
+Categories=
+GenericName=startup sound
