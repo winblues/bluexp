@@ -8,7 +8,7 @@ XFCE_WINXP_TC_VERSION="4f73e4a740041635eecd30abccc2fdafabb21582"
 
 mkdir -p /tmp/xfce-winxp-tc
 cd /tmp/xfce-winxp-tc
-git clone https://github.com/rozniak/xfce-winxp-tc.git
+git clone --depth 1 https://github.com/rozniak/xfce-winxp-tc.git
 cd xfce-winxp-tc
 git checkout $XFCE_WINXP_TC_VERSION
 bash packaging/buildall.sh

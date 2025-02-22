@@ -30,7 +30,6 @@ modules:
       - libvirt
       - libvirt-nss
       - libcanberra-gtk3
-      - lightdm-gtk-greeter-settings
       - mate-disk-usage-analyzer
       - mate-system-monitor
       - menulibre
