@@ -66,7 +66,6 @@ modules:
       - 01-main.sh
       - 10-install-appimages.sh
       #- 20-xfce-winxp-tc.sh
-      - 21-de-tweaks.sh
 
   - type: default-flatpaks
     notify: true # Send notification after install/uninstall is finished
