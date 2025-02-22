@@ -12,9 +12,6 @@ modules:
     files:
       - source: system
         destination: /
-  - type: script
-    scripts:
-      - 20-xfce-winxp-tc.sh
 
   - type: bling
     install:
@@ -64,7 +61,7 @@ modules:
       - 00-image-info.sh
       - 01-main.sh
       - 10-install-appimages.sh
-      #- 20-xfce-winxp-tc.sh
+      - 20-xfce-winxp-tc.sh
 
   - type: default-flatpaks
     notify: true # Send notification after install/uninstall is finished
