@@ -1,0 +1,30 @@
+{
+  "properties": {
+    "xsettings": {
+      "/Gtk/CursorThemeName": "standard-no-shadow",
+      "/GTK/FontName": "Tahoma 11",
+      "/Net/EnableEventSounds": true,
+      "/Net/EnableInputFeedbackSounds": true,
+      "/Net/IconThemeName": "luna",
+      "/Net/SoundThemeName": "Windows XP Default",
+      "/Net/ThemeName": "Windows XP style (Blue)",
+      "/Xft/HintStyle": "hintfull"
+    },
+    "xfwm4": {
+      "/general/button_layout": "O|HMC",
+      "/general/show_dock_shadow": false,
+      "/general/show_frame_shadow": false,
+      "/general/show_popup_shadow": false,
+      "/general/title_font": "Trebuchet MS Bold 11",
+      "/general/title_alignment": "left",
+      "/general/theme": "Windows XP style (Blue)",
+    },
+    "xfce4-keyboard-shortcuts": {
+      "/commands/custom/Super_L": "/usr/bin/wintc-taskband --start"
+    }
+  },
+  "metadata": {
+    "name": "winblues-bluexp",
+    "version": 1
+  }
+}
