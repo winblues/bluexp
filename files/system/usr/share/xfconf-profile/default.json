@@ -17,7 +17,7 @@
       "/general/show_popup_shadow": false,
       "/general/title_font": "Trebuchet MS Bold 11",
       "/general/title_alignment": "left",
-      "/general/theme": "Windows XP style (Blue)",
+      "/general/theme": "Windows XP style (Blue)"
     },
     "xfce4-keyboard-shortcuts": {
       "/commands/custom/Super_L": "/usr/bin/wintc-taskband --start"
