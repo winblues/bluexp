@@ -21,6 +21,10 @@
     },
     "xfce4-keyboard-shortcuts": {
       "/commands/custom/Super_L": "/usr/bin/wintc-taskband --start"
+    },
+    "xfce4-notifyd": {
+      "/theme": "Windows XP style (Blue)",
+      "/notify-location": "bottom-right"
     }
   },
   "metadata": {
