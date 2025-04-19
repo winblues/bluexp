@@ -15,7 +15,7 @@ images=(
   "/usr/share/backgrounds/wintc/redmoon.jpg"
 )
 
-workspace_id=1
+workspace_id=0
 for image in "${images[@]}"; do
   xfconf-query --channel xfce4-desktop --list |
     grep "workspace${workspace_id}/color-style" |
@@ -23,7 +23,7 @@ for image in "${images[@]}"; do
 
   xfconf-query --channel xfce4-desktop --list |
     grep "workspace${workspace_id}/image-style" |
-    xargs -I{} xfconf-query --create -c 'xfce4-desktop' -p {} --type 'int' --set 2
+    xargs -I{} xfconf-query --create -c 'xfce4-desktop' -p {} --type 'int' --set 3
 
   xfconf-query --channel xfce4-desktop --list |
     grep "workspace${workspace_id}/last-image" |
