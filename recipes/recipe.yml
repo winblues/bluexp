@@ -57,11 +57,8 @@ modules:
       - xscreensaver-extras-gss
 
   - type: script
-    scripts:
-      - 00-image-info.sh
-      - 01-main.sh
-      - 10-install-appimages.sh
-      - 20-xfce-winxp-tc.sh
+    snippets:
+      - 'cd $CONFIG_DIRECTORY/scripts && for script in *.sh; do [ -f "$script" ] && bash "$script"; done'
 
   - type: default-flatpaks
     notify: true # Send notification after install/uninstall is finished
