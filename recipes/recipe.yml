@@ -61,10 +61,10 @@ modules:
       - 'cd $CONFIG_DIRECTORY/scripts && for script in *.sh; do [ -f "$script" ] && bash "$script"; done'
 
   - type: default-flatpaks
-    notify: true # Send notification after install/uninstall is finished
-    system:
-      # Flathub will be used by default
-      install:
+    configurations:
+      - notify: true # Send notification after install/uninstall is finished
+        scope: system
+        install:
         - com.github.k4zmu2a.spacecadetpinball
         - org.mozilla.firefox
         - org.geany.Geany
