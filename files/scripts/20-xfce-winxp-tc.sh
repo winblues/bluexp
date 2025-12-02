@@ -10,7 +10,7 @@ set -xueo pipefail
 
 dnf5 install -y $(cat packages/xfce-winxp-tc/build-deps.txt)
 
-XFCE_WINXP_TC_VERSION="4f73e4a740041635eecd30abccc2fdafabb21582"
+XFCE_WINXP_TC_VERSION="1a2f8d5b1e43bafaa29d95718274f6080ee0908b"
 
 mkdir -p /tmp/xfce-winxp-tc
 cd /tmp/xfce-winxp-tc
