@@ -4,6 +4,9 @@
 - When justfile uses dotenv-loaded vars in `#!/bin/bash` recipe blocks, use `$VARNAME` (shell env), NOT `{{ VARNAME }}` (Just variable)
 - Use `# shellcheck disable=SC1091` for sourced files with dynamic paths; use `# shellcheck disable=SC2046` when intentional word-splitting for package lists
 - shellcheck severity: SC1091 is "info" level — `--severity=warning` passes even with this
+- GitHub Actions workflow for RPM builds: use `docker` (not `podman`) on ubuntu-latest; use `--volume "$PWD:/app:Z"` for SELinux-compat label
+- oras push syntax: `oras push <ref> --artifact-type <type> .` (run from within the directory of files to push)
+- `workflow_call` trigger enables calling build-packages.yml from other workflows (needed for US-006)
 
 # Ralph Progress Log
 Started: Wed Mar 18 01:04:45 PM CDT 2026
@@ -20,4 +23,21 @@ Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
   - Just's `dotenv-filename` directive searches for the named file starting from the justfile's directory upward — env file at repo root is found when running `just` from the `files/scripts/packages/xfce-winxp-tc/` directory
   - SC1091 (not following source) is info-level in shellcheck — suppress with `# shellcheck disable=SC1091` for dynamic paths
   - SC2046 (unquoted command substitution) is intentional for package lists — suppress with `# shellcheck disable=SC2046`
+---
+
+## 2026-03-18 - US-002
+Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
+- Created `.github/workflows/build-packages.yml` with workflow triggers: `workflow_dispatch`, `workflow_call`, push/PR on `xfce-winxp-tc.env` or the workflow file itself
+- Workflow reads `XFCE_WINXP_TC_VERSION` from `xfce-winxp-tc.env` via `source` and exports to `GITHUB_OUTPUT` and `GITHUB_ENV`
+- Sets artifact tag to `pr-<number>` on PR events, otherwise uses the commit hash from the env file
+- Clones xfce-winxp-tc at the specific version, builds dev image from existing Containerfile, runs `bash /app/packaging/buildall.sh` inside the container
+- Collects RPMs from `xptc/*/rpm/std/x86_64/fre/`, fails if directory is empty
+- Installs oras v1.2.0, logs in to GHCR, pushes RPMs as OCI artifact to `ghcr.io/winblues/xfce-winxp-tc-rpms:<tag>`
+- Files changed: `.github/workflows/build-packages.yml` (new)
+- **Learnings for future iterations:**
+  - On ubuntu-latest, use `docker` (not `podman`) for container builds — podman requires extra setup
+  - The `--volume "$PWD:/app:Z"` flag with `:Z` is needed for SELinux labeling compatibility
+  - `workflow_call` trigger (no inputs needed here) allows this workflow to be called from build.yml for US-006
+  - oras push directory: run `oras push <ref> --artifact-type <type> .` from inside the RPM directory
+  - RPMs land in `xptc/*/rpm/std/x86_64/fre/` inside the cloned source tree
 ---

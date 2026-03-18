@@ -34,7 +34,7 @@
         "YAML is syntactically valid (use `yamllint` or GitHub's own YAML parser — no syntax errors)"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "oras CLI docs: https://oras.land/docs/. Use `oras push ghcr.io/winblues/xfce-winxp-tc-rpms:<tag> --artifact-type application/vnd.bluexp.rpms <rpms-dir>/`. The existing Containerfile is at files/scripts/packages/xfce-winxp-tc/Containerfile. The build inside the container runs `bash /app/packaging/buildall.sh` from the xfce-winxp-tc source root. RPMs land in xptc/*/rpm/std/x86_64/fre/. Check the existing justfile at files/scripts/packages/xfce-winxp-tc/justfile for the exact build steps to replicate in CI."
     },
     {
