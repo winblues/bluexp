@@ -1,4 +1,4 @@
-XFCE_WINXP_TC_VERSION := "4f73e4a740041635eecd30abccc2fdafabb21582"
+set dotenv-filename := "xfce-winxp-tc.env"
 
 initialize-workspace:
   #!/bin/bash
@@ -7,7 +7,7 @@ initialize-workspace:
   cd workspace
   git clone https://github.com/rozniak/xfce-winxp-tc.git
   cd xfce-winxp-tc
-  git checkout {{ XFCE_WINXP_TC_VERSION }}
+  git checkout "$XFCE_WINXP_TC_VERSION"
 
 
 build-dev-image:
