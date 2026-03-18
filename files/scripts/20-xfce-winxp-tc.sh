@@ -5,7 +5,7 @@ set -xueo pipefail
 # shellcheck disable=SC1091
 source "${CONFIG_DIRECTORY}/xfce-winxp-tc.env"
 
-dnf5 install -y oras-cli
+dnf5 install -y golang-oras
 
 RPM_DIR=$(mktemp -d)
 cd "$RPM_DIR"
