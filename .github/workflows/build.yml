@@ -106,11 +106,16 @@ jobs:
           sudo mv oras /usr/local/bin/
           sudo apt-get install -y qemu-system-x86
 
+      - name: Read Fedora version
+        id: fedora
+        run: |
+          echo "version=$(grep 'image-version:' recipes/recipe.yml | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
       - name: Determine image reference
         id: image-ref
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "ref=ghcr.io/winblues/bluexp:pr-${{ github.event.number }}" >> "$GITHUB_OUTPUT"
+            echo "ref=ghcr.io/winblues/bluexp:pr-${{ github.event.number }}-${{ steps.fedora.outputs.version }}" >> "$GITHUB_OUTPUT"
           else
             echo "ref=ghcr.io/winblues/bluexp:latest" >> "$GITHUB_OUTPUT"
           fi
