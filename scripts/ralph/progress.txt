@@ -1,4 +1,6 @@
 ## Codebase Patterns
+- `needs: [job-a, job-b]` with a possibly-skipped job: use `if: ${{ needs.job-a.result == 'success' && (needs.job-b.result == 'success' || needs.job-b.result == 'skipped') }}` so dependent job still runs when job-b is skipped
+- `workflow_call` with no inputs: calling workflow sets `github.event_name` to `workflow_call` inside the callee — tag logic based on `pull_request` event won't fire, which is correct for hash-tagged OCI artifacts needed by image builds
 - Scripts run from `$CONFIG_DIRECTORY/scripts` (set by BlueBuild) — use `${CONFIG_DIRECTORY}/` to reference repo-root files from scripts
 - `set dotenv-filename := "xfce-winxp-tc.env"` in justfile loads dotenv from the justfile's directory upward (Just traverses up the tree)
 - When justfile uses dotenv-loaded vars in `#!/bin/bash` recipe blocks, use `$VARNAME` (shell env), NOT `{{ VARNAME }}` (Just variable)
@@ -86,4 +88,18 @@ Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
   - bootc-image-builder outputs QCOW2 at `output/qcow2/disk.qcow2` relative to the `-v ./output:/output` mount
   - Define a `run_ssh()` helper function to DRY up repeated SSH invocations with consistent flags
   - `|| true` on SSH commands inside `$()` prevents `set -e` from aborting when SSH exits non-zero (e.g., service not found)
+---
+
+## 2026-03-18 - US-006
+Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
+- Updated `.github/workflows/build.yml` to add `check-changes` and `build-packages` jobs before `build-image`
+- `check-changes` job: detects if `xfce-winxp-tc.env` changed using `git diff` against PR base SHA or push's `before` SHA; outputs `changed=true|false`
+- `build-packages` job: `if: needs.check-changes.outputs.changed == 'true'`, calls `.github/workflows/build-packages.yml` via `workflow_call`; skipped otherwise
+- `build-image` job: `needs: [check-changes, build-packages]` with `if` condition handling skipped `build-packages` (`result == 'skipped'` is treated as success)
+- When `build-packages.yml` is called via `workflow_call`, `github.event_name` is `workflow_call` so artifact gets tagged with version hash (correct for image build consumption)
+- Files changed: `.github/workflows/build.yml`
+- **Learnings for future iterations:**
+  - `needs: [a, b]` where b may be skipped: use `if: needs.a.result == 'success' && (needs.b.result == 'success' || needs.b.result == 'skipped')` to allow dependent job to run
+  - For push events with `github.event.before` being all zeros (new branch), skip the diff — `git diff` would fail
+  - `workflow_call` trigger means `github.event_name == 'workflow_call'` inside the callee — event-based tag logic won't see `pull_request`
 ---

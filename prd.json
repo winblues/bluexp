@@ -109,7 +109,7 @@
         "YAML is syntactically valid"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Two approaches for conditional job: (1) Use a separate `check-changes` job that outputs whether xfce-winxp-tc.env changed, then use `if: needs.check-changes.outputs.changed == 'true'` on the build-packages job. (2) Use `workflow_call` on build-packages.yml and call it from build.yml. Approach (1) is simpler for a single repo. To make build-packages.yml reusable via workflow_call, add a `workflow_call` trigger to it. The build-image job should always run regardless of whether packages were rebuilt."
     },
     {
