@@ -1,0 +1,23 @@
+## Codebase Patterns
+- Scripts run from `$CONFIG_DIRECTORY/scripts` (set by BlueBuild) — use `${CONFIG_DIRECTORY}/` to reference repo-root files from scripts
+- `set dotenv-filename := "xfce-winxp-tc.env"` in justfile loads dotenv from the justfile's directory upward (Just traverses up the tree)
+- When justfile uses dotenv-loaded vars in `#!/bin/bash` recipe blocks, use `$VARNAME` (shell env), NOT `{{ VARNAME }}` (Just variable)
+- Use `# shellcheck disable=SC1091` for sourced files with dynamic paths; use `# shellcheck disable=SC2046` when intentional word-splitting for package lists
+- shellcheck severity: SC1091 is "info" level — `--severity=warning` passes even with this
+
+# Ralph Progress Log
+Started: Wed Mar 18 01:04:45 PM CDT 2026
+---
+
+## 2026-03-18 - US-001
+Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
+- Created `xfce-winxp-tc.env` at repo root with `XFCE_WINXP_TC_VERSION=4f73e4a740041635eecd30abccc2fdafabb21582`
+- Updated `files/scripts/20-xfce-winxp-tc.sh` to source env file via `${CONFIG_DIRECTORY}/xfce-winxp-tc.env` instead of hard-coding the hash
+- Updated `files/scripts/packages/xfce-winxp-tc/justfile` to use `set dotenv-filename := "xfce-winxp-tc.env"` and `$XFCE_WINXP_TC_VERSION` (shell) instead of `{{ XFCE_WINXP_TC_VERSION }}` (Just variable)
+- Files changed: `xfce-winxp-tc.env` (new), `files/scripts/20-xfce-winxp-tc.sh`, `files/scripts/packages/xfce-winxp-tc/justfile`
+- **Learnings for future iterations:**
+  - BlueBuild's `$CONFIG_DIRECTORY` is set to the repo root in the build environment; scripts can source files relative to it
+  - Just's `dotenv-filename` directive searches for the named file starting from the justfile's directory upward — env file at repo root is found when running `just` from the `files/scripts/packages/xfce-winxp-tc/` directory
+  - SC1091 (not following source) is info-level in shellcheck — suppress with `# shellcheck disable=SC1091` for dynamic paths
+  - SC2046 (unquoted command substitution) is intentional for package lists — suppress with `# shellcheck disable=SC2046`
+---
