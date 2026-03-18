@@ -12,6 +12,6 @@ cd "$RPM_DIR"
 
 oras pull "ghcr.io/winblues/xfce-winxp-tc-rpms:${XFCE_WINXP_TC_VERSION}"
 
-rpm-ostree install ./*.rpm
+dnf5 install ./*.rpm
 
 plymouth-set-default-theme bootvid
