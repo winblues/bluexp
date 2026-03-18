@@ -15,8 +15,53 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 jobs:
+  check-changes:
+    name: Check for xfce-winxp-tc.env changes
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if xfce-winxp-tc.env changed
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch origin "${{ github.event.pull_request.base.sha }}" --depth=1 2>/dev/null || true
+            CHANGED=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD -- xfce-winxp-tc.env | wc -l)
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            BEFORE="${{ github.event.before }}"
+            if [[ "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
+              CHANGED=0
+            else
+              CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- xfce-winxp-tc.env | wc -l)
+            fi
+          else
+            # schedule, workflow_dispatch: use already-published artifact
+            CHANGED=0
+          fi
+          if [[ "$CHANGED" -gt 0 ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-packages:
+    name: Build xfce-winxp-tc packages
+    needs: check-changes
+    if: needs.check-changes.outputs.changed == 'true'
+    uses: ./.github/workflows/build-packages.yml
+    permissions:
+      contents: read
+      packages: write
+
   build-image:
     name: Build image
+    needs: [check-changes, build-packages]
+    if: ${{ needs.check-changes.result == 'success' && (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
