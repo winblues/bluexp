@@ -4,7 +4,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^xfce-winxp-tc\\.env$"],
+      "fileMatch": ["^files/xfce-winxp-tc\\.env$"],
       "matchStrings": [
         "XFCE_WINXP_TC_VERSION=(?<currentDigest>[a-f0-9]+)"
       ],

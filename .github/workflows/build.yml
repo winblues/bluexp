@@ -31,13 +31,13 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             git fetch origin "${{ github.event.pull_request.base.sha }}" --depth=1 2>/dev/null || true
-            CHANGED=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD -- xfce-winxp-tc.env | wc -l)
+            CHANGED=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD -- files/xfce-winxp-tc.env | wc -l)
           elif [[ "${{ github.event_name }}" == "push" ]]; then
             BEFORE="${{ github.event.before }}"
             if [[ "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
               CHANGED=0
             else
-              CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- xfce-winxp-tc.env | wc -l)
+              CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- files/xfce-winxp-tc.env | wc -l)
             fi
           else
             # schedule, workflow_dispatch: use already-published artifact

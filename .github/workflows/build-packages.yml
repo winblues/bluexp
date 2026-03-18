@@ -5,11 +5,11 @@ on:
   workflow_call:
   push:
     paths:
-      - "xfce-winxp-tc.env"
+      - "files/xfce-winxp-tc.env"
       - ".github/workflows/build-packages.yml"
   pull_request:
     paths:
-      - "xfce-winxp-tc.env"
+      - "files/xfce-winxp-tc.env"
       - ".github/workflows/build-packages.yml"
 
 jobs:
@@ -26,8 +26,8 @@ jobs:
       - name: Read xfce-winxp-tc version
         id: version
         run: |
-          # shellcheck source=xfce-winxp-tc.env
-          source xfce-winxp-tc.env
+          # shellcheck source=files/xfce-winxp-tc.env
+          source files/xfce-winxp-tc.env
           echo "version=${XFCE_WINXP_TC_VERSION}" >> "$GITHUB_OUTPUT"
           echo "XFCE_WINXP_TC_VERSION=${XFCE_WINXP_TC_VERSION}" >> "$GITHUB_ENV"
 

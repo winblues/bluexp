@@ -1,4 +1,4 @@
-set dotenv-filename := "xfce-winxp-tc.env"
+set dotenv-filename := "files/xfce-winxp-tc.env"
 
 initialize-workspace:
   #!/bin/bash
