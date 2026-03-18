@@ -70,3 +70,20 @@ Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
   - Both `dependabot.yml` and `renovate.json` can coexist in the same repo — Renovate for custom/complex deps, Dependabot for GitHub Actions
   - Renovate `git-refs` datasource + `currentDigest` capture is the correct approach for repos with no tags, only commits
 ---
+
+## 2026-03-18 - US-005
+Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
+- Created `scripts/smoke-test.sh` as an executable bash script that converts a bootc container image to QCOW2 via bootc-image-builder and boots it in QEMU to verify system health
+- Script generates a throwaway ed25519 SSH keypair per-run, injects it via a dynamic config.toml into bootc-image-builder
+- SSH polling loop waits up to 5 minutes (300s in 5s increments) before failing
+- Checks `systemctl is-system-running` (accepts `running` or `degraded`) and `systemctl is-active lightdm` (requires `active`)
+- Cleanup trap kills QEMU and removes temp dir on EXIT, preserving correct exit code
+- Added `test-smoke` recipe to `justfile` calling `scripts/smoke-test.sh ghcr.io/winblues/bluexp:latest`
+- Files changed: `scripts/smoke-test.sh` (new), `justfile`
+- **Learnings for future iterations:**
+  - `cleanup() { local exit_code=$?; ...; exit "$exit_code"; }` pattern is required to preserve exit codes through EXIT traps
+  - `while ! ssh ...; do` is shellcheck-clean and `set -e`-safe (while condition is exempt from set -e)
+  - bootc-image-builder outputs QCOW2 at `output/qcow2/disk.qcow2` relative to the `-v ./output:/output` mount
+  - Define a `run_ssh()` helper function to DRY up repeated SSH invocations with consistent flags
+  - `|| true` on SSH commands inside `$()` prevents `set -e` from aborting when SSH exits non-zero (e.g., service not found)
+---

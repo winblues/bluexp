@@ -93,7 +93,7 @@
         "shellcheck passes on `scripts/smoke-test.sh`"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "bootc-image-builder Podman invocation example is already in the justfile (`just vm` recipe) — reuse that pattern. For the SSH keypair: generate a throwaway ed25519 keypair in the script (or check in a test fixture key at scripts/smoke-test-key) and inject it via a test-specific config-test.toml. The QEMU command needs: -m 4096 -smp 2 -drive file=<qcow2>,format=qcow2 -netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0 -nographic. SSH polling: use `ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -i <key> -p 2222 user@localhost true` in a loop."
     },
     {
