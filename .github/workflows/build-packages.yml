@@ -1,0 +1,96 @@
+name: build-packages
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    paths:
+      - "xfce-winxp-tc.env"
+      - ".github/workflows/build-packages.yml"
+  pull_request:
+    paths:
+      - "xfce-winxp-tc.env"
+      - ".github/workflows/build-packages.yml"
+
+jobs:
+  build-packages:
+    name: Build xfce-winxp-tc RPMs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read xfce-winxp-tc version
+        id: version
+        run: |
+          # shellcheck source=xfce-winxp-tc.env
+          source xfce-winxp-tc.env
+          echo "version=${XFCE_WINXP_TC_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "XFCE_WINXP_TC_VERSION=${XFCE_WINXP_TC_VERSION}" >> "$GITHUB_ENV"
+
+      - name: Set artifact tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "tag=pr-${{ github.event.number }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clone xfce-winxp-tc source
+        run: |
+          mkdir -p workspace
+          git clone https://github.com/rozniak/xfce-winxp-tc.git workspace/xfce-winxp-tc
+          cd workspace/xfce-winxp-tc
+          git checkout "$XFCE_WINXP_TC_VERSION"
+
+      - name: Build dev image
+        run: |
+          docker build \
+            -f files/scripts/packages/xfce-winxp-tc/Containerfile \
+            -t xfce-winxp-tc-dev-image \
+            files/scripts/packages/xfce-winxp-tc/
+
+      - name: Build RPMs
+        run: |
+          cd workspace/xfce-winxp-tc
+          docker run --rm \
+            --volume "$PWD:/app:Z" \
+            --workdir /app \
+            xfce-winxp-tc-dev-image \
+            bash /app/packaging/buildall.sh
+
+      - name: Collect RPMs
+        run: |
+          mkdir -p rpms
+          find workspace/xfce-winxp-tc/xptc -name "*.rpm" -path "*/rpm/std/x86_64/fre/*" -exec cp {} rpms/ \;
+          echo "RPMs collected:"
+          ls -la rpms/
+          if [ -z "$(ls -A rpms/)" ]; then
+            echo "ERROR: RPM output directory is empty after build"
+            exit 1
+          fi
+
+      - name: Install oras
+        run: |
+          ORAS_VERSION="1.2.0"
+          curl -sSLO "https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz"
+          tar -zxf "oras_${ORAS_VERSION}_linux_amd64.tar.gz" oras
+          sudo mv oras /usr/local/bin/oras
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ github.token }}" | oras login ghcr.io \
+            --username "${{ github.actor }}" \
+            --password-stdin
+
+      - name: Push RPMs to GHCR
+        run: |
+          cd rpms
+          oras push \
+            "ghcr.io/winblues/xfce-winxp-tc-rpms:${{ steps.tag.outputs.tag }}" \
+            --artifact-type application/vnd.bluexp.rpms \
+            .
