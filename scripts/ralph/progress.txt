@@ -103,3 +103,19 @@ Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
   - For push events with `github.event.before` being all zeros (new branch), skip the diff — `git diff` would fail
   - `workflow_call` trigger means `github.event_name == 'workflow_call'` inside the callee — event-based tag logic won't see `pull_request`
 ---
+
+## 2026-03-18 - US-007
+Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
+- Added `smoke-test` job to `.github/workflows/build.yml` that runs after `build-image`
+- Job has `timeout-minutes: 15` and `needs: build-image`
+- Enables KVM with `sudo chmod 666 /dev/kvm`
+- Installs oras v1.2.0 and `qemu-system-x86` via apt; bootc-image-builder pulled as container via Podman (already available on ubuntu-latest)
+- Determines image ref: `pr-<number>` on `pull_request` events, `latest` otherwise
+- Calls `scripts/smoke-test.sh` with the resolved image reference
+- Files changed: `.github/workflows/build.yml`
+- **Learnings for future iterations:**
+  - `needs: build-image` on a matrix job waits for all matrix variants to complete before smoke-test starts
+  - KVM on ubuntu-latest requires `sudo chmod 666 /dev/kvm` — must be a step before any QEMU invocation
+  - bootc-image-builder runs as a container image pulled by podman — no separate install step needed
+  - BlueBuild github-action tags PRs as `pr-<number>`, pushes to default branch as `latest`
+---

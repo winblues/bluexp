@@ -127,7 +127,7 @@
         "YAML is syntactically valid"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "ubuntu-latest runners support KVM — other projects confirm this works. Enable it with: `- run: sudo chmod 666 /dev/kvm` before invoking QEMU. The image reference for PRs from the BlueBuild action is typically `ghcr.io/winblues/bluexp:pr-<number>` — verify the exact tag format the blue-build/github-action produces by reading its docs or output. The smoke-test.sh script (US-005) must exist before this story can be implemented."
     }
   ]
