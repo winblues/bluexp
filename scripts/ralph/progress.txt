@@ -7,6 +7,7 @@
 - GitHub Actions workflow for RPM builds: use `docker` (not `podman`) on ubuntu-latest; use `--volume "$PWD:/app:Z"` for SELinux-compat label
 - oras push syntax: `oras push <ref> --artifact-type <type> .` (run from within the directory of files to push)
 - `workflow_call` trigger enables calling build-packages.yml from other workflows (needed for US-006)
+- oras pull: `oras pull <ref>` downloads artifact files into the current directory; use `mktemp -d` + `cd` pattern for clean temp dir
 
 # Ralph Progress Log
 Started: Wed Mar 18 01:04:45 PM CDT 2026
@@ -40,4 +41,18 @@ Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
   - `workflow_call` trigger (no inputs needed here) allows this workflow to be called from build.yml for US-006
   - oras push directory: run `oras push <ref> --artifact-type <type> .` from inside the RPM directory
   - RPMs land in `xptc/*/rpm/std/x86_64/fre/` inside the cloned source tree
+---
+
+## 2026-03-18 - US-003
+Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
+- Rewrote `files/scripts/20-xfce-winxp-tc.sh` to pull pre-built RPMs from GHCR instead of compiling from source
+- Script now: installs `oras-cli` via `dnf5`, creates a temp dir, runs `oras pull ghcr.io/winblues/xfce-winxp-tc-rpms:${XFCE_WINXP_TC_VERSION}`, installs RPMs with `rpm-ostree install ./*.rpm`, sets plymouth theme
+- Removed: build deps install, git clone, git checkout, bash packaging/buildall.sh
+- `set -xueo pipefail` ensures `oras pull` failure exits non-zero immediately
+- Files changed: `files/scripts/20-xfce-winxp-tc.sh`
+- **Learnings for future iterations:**
+  - `oras pull <ref>` downloads artifact files into the current directory — use `mktemp -d && cd` for isolation
+  - `./*.rpm` glob passed directly to `rpm-ostree install` is clean and shellcheck-safe
+  - `set -e` (via `set -xueo pipefail`) guarantees non-zero exit if any step fails, including oras pull
+  - `xfce-winxp-tc.env` at repo root remains accessible via `${CONFIG_DIRECTORY}/xfce-winxp-tc.env` — no need to move it
 ---

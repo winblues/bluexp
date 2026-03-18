@@ -2,27 +2,16 @@
 
 set -xueo pipefail
 
-# Ideally, we would build and package this outside of the image build process.
-# However, it's probably not possible to package this in on Fedora's COPR
-# because of licensing concerns with some of the assets
-#
-# TODO: package this using a separate GitHub repo maybe?
-
 # shellcheck disable=SC1091
 source "${CONFIG_DIRECTORY}/xfce-winxp-tc.env"
 
-# shellcheck disable=SC2046
-dnf5 install -y $(cat packages/xfce-winxp-tc/build-deps.txt)
+dnf5 install -y oras-cli
 
-mkdir -p /tmp/xfce-winxp-tc
-cd /tmp/xfce-winxp-tc
-git clone https://github.com/rozniak/xfce-winxp-tc.git
-cd xfce-winxp-tc
-git checkout "$XFCE_WINXP_TC_VERSION"
-bash packaging/buildall.sh
+RPM_DIR=$(mktemp -d)
+cd "$RPM_DIR"
 
-rpm-ostree install xptc/*/rpm/std/x86_64/fre/wintc-*.rpm
+oras pull "ghcr.io/winblues/xfce-winxp-tc-rpms:${XFCE_WINXP_TC_VERSION}"
 
-# TODO: remove build packages
+rpm-ostree install ./*.rpm
 
 plymouth-set-default-theme bootvid

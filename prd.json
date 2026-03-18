@@ -53,7 +53,7 @@
         "shellcheck passes on the modified script"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "The file xfce-winxp-tc.env needs to be accessible inside the container build. BlueBuild copies the files/ directory into the build context, but xfce-winxp-tc.env is at the repo root. Options: (1) move it to files/scripts/xfce-winxp-tc.env and reference it from there, (2) add it to files/ so BlueBuild copies it, or (3) embed the version lookup differently. The simplest approach may be to place xfce-winxp-tc.env inside files/ so it gets copied by the files module. Coordinate with US-001 — wherever the file lands, all references must agree."
     },
     {
