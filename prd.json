@@ -70,7 +70,7 @@
         "The `renovate.json` includes `\"$schema\"` pointing to the Renovate config schema URL for editor validation"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Renovate git-refs datasource docs: https://docs.renovatebot.com/modules/datasource/git-refs/. The customManagers regex approach: use `fileMatch` targeting xfce-winxp-tc.env, `matchStrings` to capture the hash, `depNameTemplate` for the dep name, `datasourceTemplate: git-refs`, `packageNameTemplate: https://github.com/rozniak/xfce-winxp-tc`. Existing dependabot config is at .github/dependabot.yml — read it first and decide whether to migrate or keep both."
     },
     {

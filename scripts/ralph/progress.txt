@@ -56,3 +56,17 @@ Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
   - `set -e` (via `set -xueo pipefail`) guarantees non-zero exit if any step fails, including oras pull
   - `xfce-winxp-tc.env` at repo root remains accessible via `${CONFIG_DIRECTORY}/xfce-winxp-tc.env` — no need to move it
 ---
+
+## 2026-03-18 - US-004
+Thread: https://ampcode.com/threads/$AMP_CURRENT_THREAD_ID
+- Created `renovate.json` at repo root with Renovate configuration for xfce-winxp-tc upstream tracking
+- `customManagers` regex entry targets `xfce-winxp-tc.env`, captures `currentDigest`, uses `git-refs` datasource pointing to `https://github.com/rozniak/xfce-winxp-tc` with `currentValueTemplate: "HEAD"` to track default branch
+- `packageRules` sets `commitMessageTopic: "xfce-winxp-tc"` and `commitMessageExtra: "to {{newDigest}}"` to produce the required PR title pattern
+- Kept `.github/dependabot.yml` as-is for GitHub Actions dependency updates — both tools can coexist
+- Files changed: `renovate.json` (new)
+- **Learnings for future iterations:**
+  - For git commit hash tracking with Renovate: use `currentDigest` capture group (not `currentValue`) in `matchStrings`; set `currentValueTemplate: "HEAD"` to track default branch
+  - `config:recommended` is the standard Renovate base preset
+  - Both `dependabot.yml` and `renovate.json` can coexist in the same repo — Renovate for custom/complex deps, Dependabot for GitHub Actions
+  - Renovate `git-refs` datasource + `currentDigest` capture is the correct approach for repos with no tags, only commits
+---
