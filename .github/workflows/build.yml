@@ -115,5 +115,8 @@ jobs:
             echo "ref=ghcr.io/winblues/bluexp:latest" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Pull image into local storage
+        run: sudo podman pull "${{ steps.image-ref.outputs.ref }}"
+
       - name: Run smoke test
         run: scripts/smoke-test.sh "${{ steps.image-ref.outputs.ref }}"

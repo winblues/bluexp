@@ -5,6 +5,8 @@ test-local:
   bluebuild rebase --tempdir /var/tmp recipes/recipe.yml
 
 test-smoke:
+  #!/bin/bash
+  podman pull ghcr.io/winblues/bluexp:latest
   bash scripts/smoke-test.sh ghcr.io/winblues/bluexp:latest
 
 generate-iso:
