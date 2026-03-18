@@ -31,13 +31,18 @@ jobs:
           echo "version=${XFCE_WINXP_TC_VERSION}" >> "$GITHUB_OUTPUT"
           echo "XFCE_WINXP_TC_VERSION=${XFCE_WINXP_TC_VERSION}" >> "$GITHUB_ENV"
 
+      - name: Read Fedora version
+        id: fedora
+        run: |
+          echo "version=$(grep 'image-version:' recipes/recipe.yml | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
       - name: Set artifact tag
         id: tag
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "tag=pr-${{ github.event.number }}" >> "$GITHUB_OUTPUT"
+            echo "tag=pr-${{ github.event.number }}-${{ steps.fedora.outputs.version }}" >> "$GITHUB_OUTPUT"
           else
-            echo "tag=${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ steps.version.outputs.version }}-${{ steps.fedora.outputs.version }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Clone xfce-winxp-tc source
