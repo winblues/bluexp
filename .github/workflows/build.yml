@@ -85,3 +85,35 @@ jobs:
 
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
+
+  smoke-test:
+    name: Smoke test
+    needs: build-image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: sudo chmod 666 /dev/kvm
+
+      - name: Install prerequisites
+        run: |
+          ORAS_VERSION="1.2.0"
+          curl -LO "https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz"
+          tar -zxf "oras_${ORAS_VERSION}_linux_amd64.tar.gz"
+          sudo mv oras /usr/local/bin/
+          sudo apt-get install -y qemu-system-x86
+
+      - name: Determine image reference
+        id: image-ref
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "ref=ghcr.io/winblues/bluexp:pr-${{ github.event.number }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=ghcr.io/winblues/bluexp:latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run smoke test
+        run: scripts/smoke-test.sh "${{ steps.image-ref.outputs.ref }}"
