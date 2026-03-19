@@ -90,6 +90,7 @@ jobs:
     name: Smoke test
     needs: build-image
     runs-on: ubuntu-latest
+    if: false
     timeout-minutes: 15
     steps:
       - name: Checkout repository

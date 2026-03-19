@@ -13,7 +13,7 @@ cleanup() {
     if [[ -n "$QEMU_PID" ]]; then
         kill "$QEMU_PID" 2>/dev/null || true
     fi
-    rm -rf "$WORK_DIR"
+    sudo rm -rf "$WORK_DIR"
     exit "$exit_code"
 }
 trap cleanup EXIT
@@ -47,6 +47,7 @@ sudo podman run \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
     quay.io/centos-bootc/bootc-image-builder:latest \
     --type qcow2 \
+    --rootfs xfs \
     --use-librepo=True \
     "${IMAGE}"
 
@@ -54,6 +55,7 @@ QCOW2="${WORK_DIR}/output/qcow2/disk.qcow2"
 if [[ ! -f "$QCOW2" ]]; then
     fail "No QCOW2 found at ${QCOW2} after image conversion"
 fi
+sudo chmod a+r "${QCOW2}"
 
 # Boot the QCOW2 with QEMU, forwarding host port 2222 to guest port 22
 qemu-system-x86_64 \

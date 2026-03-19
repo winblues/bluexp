@@ -4,9 +4,9 @@ build:
 test-local:
   bluebuild rebase --tempdir /var/tmp recipes/recipe.yml
 
-test-smoke:
+smoke-test:
   #!/bin/bash
-  podman pull ghcr.io/winblues/bluexp:latest
+  sudo podman pull ghcr.io/winblues/bluexp:latest
   bash scripts/smoke-test.sh ghcr.io/winblues/bluexp:latest
 
 generate-iso:
@@ -27,5 +27,6 @@ vm:
     -v /var/lib/containers/storage:/var/lib/containers/storage \
     quay.io/centos-bootc/bootc-image-builder:latest \
     --type qcow2 \
-     --use-librepo=True \
+    --rootfs xfs \
+    --use-librepo=True \
     ghcr.io/winblues/bluexp:latest
