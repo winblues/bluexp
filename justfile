@@ -1,6 +1,38 @@
 build:
   bluebuild build -B podman --tempdir /var/tmp recipes/recipe.yml
 
+update-build-deps:
+  #!/bin/bash
+  set -euo pipefail
+  REPO="vendor/xfce-winxp-tc"
+  DEPMAP="${REPO}/tools/bldutils/depmap/depmap.py"
+  TARGETS="${REPO}/packaging/targets"
+  OUT="files/scripts/packages/xfce-winxp-tc/build-deps.txt"
+
+  if [[ ! -d "$REPO" ]]; then
+    echo "error: ${REPO} not found — clone xfce-winxp-tc there first" >&2
+    exit 1
+  fi
+
+  while IFS= read -r target; do
+    deps_file="${REPO}/${target}/deps"
+    [[ ! -f "$deps_file" ]] && continue
+    first=$(head -1 "$deps_file")
+    [[ ! "$first" =~ ^(bt|rt|bt,rt): ]] && deps_file="${REPO}/${target}/${first}"
+    python3 "$DEPMAP" "$deps_file" rpm 2>/dev/null || true
+  done < "$TARGETS" | grep '^bt:' | sed 's/^bt://' | grep -v '^wintc-' | sort -u > "$OUT"
+
+  echo "updated ${OUT}"
+
+check-build-deps: update-build-deps
+  #!/bin/bash
+  set -euo pipefail
+  if ! git diff --exit-code files/scripts/packages/xfce-winxp-tc/build-deps.txt > /dev/null; then
+    echo "error: build-deps.txt is out of date — run 'just update-build-deps' and commit the result" >&2
+    exit 1
+  fi
+  echo "build-deps.txt is up to date"
+
 test-local:
   bluebuild rebase --tempdir /var/tmp recipes/recipe.yml
 
