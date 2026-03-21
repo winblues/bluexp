@@ -14,13 +14,16 @@ update-build-deps:
     exit 1
   fi
 
+  source files/xfce-winxp-tc.env
+  git -C "$REPO" checkout "$XFCE_WINXP_TC_VERSION"
+
   while IFS= read -r target; do
     deps_file="${REPO}/${target}/deps"
     [[ ! -f "$deps_file" ]] && continue
     first=$(head -1 "$deps_file")
     [[ ! "$first" =~ ^(bt|rt|bt,rt): ]] && deps_file="${REPO}/${target}/${first}"
     python3 "$DEPMAP" "$deps_file" rpm 2>/dev/null || true
-  done < "$TARGETS" | grep '^bt:' | sed 's/^bt://' | grep -v '^wintc-' | sort -u > "$OUT"
+  done < "$TARGETS" | grep '^bt:' | sed 's/^bt://' | grep -v '^wintc-' | LC_ALL=C sort -u > "$OUT"
 
   echo "updated ${OUT}"
 

@@ -1,3 +1,4 @@
+NetworkManager-libnm-devel
 garcon-devel
 gdk-pixbuf2-devel
 glib2-devel
@@ -9,7 +10,6 @@ libcanberra-gtk3
 libxml2-devel
 libzip-devel
 lightdm-gobject-devel
-NetworkManager-libnm-devel
 python3-pillow
 python3-virtualenv
 rubygem-sass
