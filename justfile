@@ -1,12 +1,38 @@
+container_engine := env_var_or_default("CONTAINER_ENGINE", "podman")
+
 build:
   bluebuild build -B podman --tempdir /var/tmp recipes/recipe.yml
+
+build-rpms:
+  #!/bin/bash
+  set -euo pipefail
+  REPO="vendor/xfce-winxp-tc"
+
+  if [[ ! -d "$REPO" ]]; then
+    echo "error: ${REPO} not found — clone xfce-winxp-tc there first" >&2
+    exit 1
+  fi
+
+  source files/xfce-winxp-tc.env
+  git -C "$REPO" checkout "$XFCE_WINXP_TC_VERSION"
+
+  {{container_engine}} build \
+    -f files/scripts/packages/xfce-winxp-tc/Containerfile \
+    -t xfce-winxp-tc-dev-image \
+    files/scripts/packages/xfce-winxp-tc/
+
+  cd "$REPO"
+  {{container_engine}} run --rm \
+    --volume "$PWD:/app:Z" \
+    --workdir /app \
+    xfce-winxp-tc-dev-image \
+    bash /app/packaging/buildall.sh
 
 update-build-deps:
   #!/bin/bash
   set -euo pipefail
   REPO="vendor/xfce-winxp-tc"
   DEPMAP="${REPO}/tools/bldutils/depmap/depmap.py"
-  TARGETS="${REPO}/packaging/targets"
   OUT="files/scripts/packages/xfce-winxp-tc/build-deps.txt"
 
   if [[ ! -d "$REPO" ]]; then
@@ -17,13 +43,13 @@ update-build-deps:
   source files/xfce-winxp-tc.env
   git -C "$REPO" checkout "$XFCE_WINXP_TC_VERSION"
 
-  while IFS= read -r target; do
-    deps_file="${REPO}/${target}/deps"
-    [[ ! -f "$deps_file" ]] && continue
+  while IFS= read -r deps_file; do
+    dir=$(dirname "$deps_file")
     first=$(head -1 "$deps_file")
-    [[ ! "$first" =~ ^(bt|rt|bt,rt): ]] && deps_file="${REPO}/${target}/${first}"
+    [[ ! "$first" =~ ^(bt|rt|bt,rt): ]] && deps_file="${dir}/${first}"
     python3 "$DEPMAP" "$deps_file" rpm 2>/dev/null || true
-  done < "$TARGETS" | grep '^bt:' | sed 's/^bt://' | grep -v '^wintc-' | LC_ALL=C sort -u > "$OUT"
+  done < <(find "$REPO" -name "deps" -not -path "*/.git/*") \
+    | grep '^bt:' | sed 's/^bt://' | grep -v '^wintc-' | LC_ALL=C sort -u > "$OUT"
 
   echo "updated ${OUT}"
 

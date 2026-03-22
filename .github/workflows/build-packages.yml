@@ -57,21 +57,10 @@ jobs:
       - name: Assert build-deps.txt is up to date
         run: just check-build-deps
 
-      - name: Build dev image
-        run: |
-          docker build \
-            -f files/scripts/packages/xfce-winxp-tc/Containerfile \
-            -t xfce-winxp-tc-dev-image \
-            files/scripts/packages/xfce-winxp-tc/
-
       - name: Build RPMs
-        run: |
-          cd vendor/xfce-winxp-tc
-          docker run --rm \
-            --volume "$PWD:/app:Z" \
-            --workdir /app \
-            xfce-winxp-tc-dev-image \
-            bash /app/packaging/buildall.sh
+        run: just build-rpms
+        env:
+          CONTAINER_ENGINE: docker
 
       - name: Collect RPMs
         run: |
