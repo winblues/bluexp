@@ -45,33 +45,27 @@ jobs:
             echo "tag=${{ steps.version.outputs.version }}-${{ steps.fedora.outputs.version }}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Install just
+        uses: extractions/setup-just@v2
+
       - name: Clone xfce-winxp-tc source
         run: |
-          mkdir -p workspace
-          git clone https://github.com/rozniak/xfce-winxp-tc.git workspace/xfce-winxp-tc
-          cd workspace/xfce-winxp-tc
+          git clone https://github.com/rozniak/xfce-winxp-tc.git vendor/xfce-winxp-tc
+          cd vendor/xfce-winxp-tc
           git checkout "$XFCE_WINXP_TC_VERSION"
 
-      - name: Build dev image
-        run: |
-          docker build \
-            -f files/scripts/packages/xfce-winxp-tc/Containerfile \
-            -t xfce-winxp-tc-dev-image \
-            files/scripts/packages/xfce-winxp-tc/
+      - name: Assert build-deps.txt is up to date
+        run: just check-build-deps
 
       - name: Build RPMs
-        run: |
-          cd workspace/xfce-winxp-tc
-          docker run --rm \
-            --volume "$PWD:/app:Z" \
-            --workdir /app \
-            xfce-winxp-tc-dev-image \
-            bash /app/packaging/buildall.sh
+        run: just build-rpms
+        env:
+          CONTAINER_ENGINE: docker
 
       - name: Collect RPMs
         run: |
           mkdir -p rpms
-          find workspace/xfce-winxp-tc/xptc -name "*.rpm" -path "*/rpm/std/x86_64/fre/*" -exec cp {} rpms/ \;
+          find vendor/xfce-winxp-tc/xptc -name "*.rpm" -path "*/rpm/std/x86_64/fre/*" -exec cp {} rpms/ \;
           echo "RPMs collected:"
           ls -la rpms/
           if [ -z "$(ls -A rpms/)" ]; then
