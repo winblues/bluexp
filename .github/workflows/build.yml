@@ -15,53 +15,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 jobs:
-  check-changes:
-    name: Check for xfce-winxp-tc.env changes
-    runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.check.outputs.changed }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Check if xfce-winxp-tc.env changed
-        id: check
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            git fetch origin "${{ github.event.pull_request.base.sha }}" --depth=1 2>/dev/null || true
-            CHANGED=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD -- files/xfce-winxp-tc.env | wc -l)
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            BEFORE="${{ github.event.before }}"
-            if [[ "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
-              CHANGED=0
-            else
-              CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- files/xfce-winxp-tc.env | wc -l)
-            fi
-          else
-            # schedule, workflow_dispatch: use already-published artifact
-            CHANGED=0
-          fi
-          if [[ "$CHANGED" -gt 0 ]]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-  build-packages:
-    name: Build xfce-winxp-tc packages
-    needs: check-changes
-    if: needs.check-changes.outputs.changed == 'true'
-    uses: ./.github/workflows/build-packages.yml
-    permissions:
-      contents: read
-      packages: write
-
   build-image:
     name: Build image
-    needs: [check-changes, build-packages]
-    if: ${{ needs.check-changes.result == 'success' && (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -85,44 +40,3 @@ jobs:
 
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
-
-  smoke-test:
-    name: Smoke test
-    needs: build-image
-    runs-on: ubuntu-latest
-    if: false
-    timeout-minutes: 15
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Enable KVM
-        run: sudo chmod 666 /dev/kvm
-
-      - name: Install prerequisites
-        run: |
-          ORAS_VERSION="1.2.0"
-          curl -LO "https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz"
-          tar -zxf "oras_${ORAS_VERSION}_linux_amd64.tar.gz"
-          sudo mv oras /usr/local/bin/
-          sudo apt-get install -y qemu-system-x86
-
-      - name: Read Fedora version
-        id: fedora
-        run: |
-          echo "version=$(grep 'image-version:' recipes/recipe.yml | awk '{print $2}')" >> "$GITHUB_OUTPUT"
-
-      - name: Determine image reference
-        id: image-ref
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "ref=ghcr.io/winblues/bluexp:pr-${{ github.event.number }}-${{ steps.fedora.outputs.version }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "ref=ghcr.io/winblues/bluexp:latest" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Pull image into local storage
-        run: sudo podman pull "${{ steps.image-ref.outputs.ref }}"
-
-      - name: Run smoke test
-        run: scripts/smoke-test.sh "${{ steps.image-ref.outputs.ref }}"
