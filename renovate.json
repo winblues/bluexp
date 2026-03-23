@@ -1,0 +1,24 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^files/xfce-winxp-tc\\.env$"],
+      "matchStrings": [
+        "XFCE_WINXP_TC_VERSION=(?<currentDigest>[a-f0-9]+)"
+      ],
+      "depNameTemplate": "xfce-winxp-tc",
+      "datasourceTemplate": "git-refs",
+      "packageNameTemplate": "https://github.com/rozniak/xfce-winxp-tc",
+      "currentValueTemplate": "HEAD"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["xfce-winxp-tc"],
+      "commitMessageTopic": "xfce-winxp-tc",
+      "commitMessageExtra": "to {{newDigest}}"
+    }
+  ]
+}
